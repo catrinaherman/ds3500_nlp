@@ -23,19 +23,21 @@ class TextAnalysis:
 
     def generic_parser(self, text):
         text = text.lower()
-        # take out punctuation
-        clean_text = re.sub(rf"[{re.escape(string.punctuation)}]", "", text)
-        # take out unneccessary spaces
-        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
 
-        words = clean_text.split()
-        # split up sentences
-        sentences = re.split(r'[.!?]', clean_text)
-        # remove empty strings
+        # record the sentences
+        sentences = re.split(r'[.!?]', text)
         sentences = [s.strip() for s in sentences if s.strip()]
 
+
+        # Clean the text -- white space and punctuation
+        clean_text = re.sub(rf"[{re.escape(string.punctuation)}]", "", text)
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+
+        # Split up words
+        words = clean_text.split()
         words = [word for word in words if word not in self.stopwords]
 
+        # Get sentiment for raw text
         sentiment = TextBlob(text).sentiment.polarity
 
         text_dict = {
@@ -47,6 +49,8 @@ class TextAnalysis:
             "avg_sentence_len": len(words) / len(sentences),
             "sentiment": sentiment
         }
+
+        return text_dict
 
     def load_text(self, filename, label=None, parser=None):
         # Register a text file with the library. The label is an optional label you’ll use in your
