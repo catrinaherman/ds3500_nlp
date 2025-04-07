@@ -219,7 +219,40 @@ class TextAnalysis:
         )
         fig.show()
 
-    def your_third_visualization(self, misc_parameters):
-        # A single visualization that overlays data from each of the text files. Make sure your
-        # visualization distinguishes the data from each text file using labels or a legend
-        pass
+    def article_sentiment_comparison(self, sentiment_type='positive'):
+        """
+        Creates bar chart comparing each article's selected sentiment type score.
+        """
+        if sentiment_type not in ['positive', 'negative', 'neutral']:
+            raise ValueError("sentiment_type must be 'positive', 'negative', or 'neutral'")
+        
+        article_labels = list(self.data['sentiment_counts'].keys())
+        values = []
+
+        for label in article_labels:
+            count = self.data['sentiment_counts'][label].get(sentiment_type, 0)
+            values.append(count)
+
+        color_map_dict = {
+            'positive': 'green',
+            'negative': 'red',
+            'neutral': 'gray'
+        }
+
+        fig = go.Figure(data=[
+            go.Bar(
+                x = article_labels,
+                y = values,
+                marker_color = color_map_dict[sentiment_type]
+            )
+        ])
+
+        fig.update_layout(
+            title = f"Comparison of {sentiment_type.capitalize()} Sentences in Each Article",
+            xaxis_title = "Article Name",
+            yaxis_title = f"Number of {sentiment_type.capitalize()} Sentences",
+            bargap = 0.3
+        )
+
+        fig.show()
+
