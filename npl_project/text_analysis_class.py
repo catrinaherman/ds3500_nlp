@@ -223,22 +223,28 @@ class TextAnalysis:
         """
         Creates bar chart comparing each article's selected sentiment type score.
         """
+        # ensure sentiment_type is positive, negative, or neutral
         if sentiment_type not in ['positive', 'negative', 'neutral']:
             raise ValueError("sentiment_type must be 'positive', 'negative', or 'neutral'")
         
+        # get article names
         article_labels = list(self.data['sentiment_counts'].keys())
+        
+        # gets sentiment value counts
         values = []
 
         for label in article_labels:
             count = self.data['sentiment_counts'][label].get(sentiment_type, 0)
             values.append(count)
 
+        # color the bars based on sentiment_type
         color_map_dict = {
             'positive': 'green',
             'negative': 'red',
             'neutral': 'gray'
         }
 
+        # make chart
         fig = go.Figure(data=[
             go.Bar(
                 x = article_labels,
