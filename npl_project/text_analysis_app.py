@@ -19,9 +19,8 @@ def main():
     pp.pprint(tt.data)
     tt.wordcount_sankey(k=5)
     tt.sentiment_distribution_subplots()
-    tt.article_sentiment_comparison()
+    tt.article_sentiment_comparison(sentiment_type='positive')
     tt.article_sentiment_comparison(sentiment_type='negative')
-    tt.article_sentiment_comparison(sentiment_type='neutral')
     tt.sentiment_scatter()
 
 if __name__ == "__main__":

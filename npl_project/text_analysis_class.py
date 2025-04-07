@@ -227,77 +227,80 @@ class TextAnalysis:
 
     def article_sentiment_comparison(self, sentiment_type='positive'):
         """
-        Creates bar chart comparing each article's selected sentiment type score.
+        Creates a bar chart comparing the percentage of a selected sentiment type
+        (positive, neutral, or negative) for each article.
         """
-        # ensure sentiment_type is positive, negative, or neutral
         if sentiment_type not in ['positive', 'negative', 'neutral']:
             raise ValueError("sentiment_type must be 'positive', 'negative', or 'neutral'")
-        
-        # get article names
-        article_labels = list(self.data['sentiment_counts'].keys())
-        
-        # gets sentiment value counts
-        values = []
+
+        article_labels = list(self.data['sentiment_percentages'].keys())
+        percentages = []
 
         for label in article_labels:
-            count = self.data['sentiment_counts'][label].get(sentiment_type, 0)
-            values.append(count)
+            percent = self.data['sentiment_percentages'][label].get(sentiment_type, 0)
+            percentages.append(percent)
 
-        # color the bars based on sentiment_type
         color_map_dict = {
             'positive': 'green',
             'negative': 'red',
             'neutral': 'gray'
         }
 
-        # make chart
         fig = go.Figure(data=[
             go.Bar(
-                x = article_labels,
-                y = values,
-                marker_color = color_map_dict[sentiment_type]
+                x=article_labels,
+                y=percentages,
+                marker_color=color_map_dict[sentiment_type],
+                text=[f"{p:.1f}%" for p in percentages],
+                textposition='auto'
             )
         ])
 
         fig.update_layout(
-            title = f"Comparison of {sentiment_type.capitalize()} Sentences in Each Article",
-            xaxis_title = "Article Name",
-            yaxis_title = f"Number of {sentiment_type.capitalize()} Sentences",
-            bargap = 0.3
+            title=f"Percentage of {sentiment_type.capitalize()} Sentences per Article",
+            xaxis_title="Article",
+            yaxis_title=f"% {sentiment_type.capitalize()} Sentences",
+            yaxis=dict(range=[0, 100]),
+            bargap=0.3
         )
 
         fig.show()
 
     def sentiment_scatter(self):
         """
-        Creates a scatterplot of positive versus negative sentiment counts for each article.
+        Creates a scatterplot of positive vs. negative sentiment percentages for each article.
         """
         x_vals = []
         y_vals = []
         labels = []
 
-        # get counts
-        for label, counts in self.data['sentiment_counts'].items():
-            total = sum(counts.values())
-            pos_count = counts['positive']
-            neg_count = counts['negative']
-            x_vals.append(pos_count)
-            y_vals.append(neg_count)
+        for label, percentages in self.data['sentiment_percentages'].items():
+            pos_percent = percentages.get('positive', 0)
+            neg_percent = percentages.get('negative', 0)
+            x_vals.append(pos_percent)
+            y_vals.append(neg_percent)
             labels.append(label)
-        
-        # make scatterplot
+
         fig = go.Figure(data=go.Scatter(
-            x = x_vals,
-            y = y_vals,
-            mode = 'markers+text',
-            text = labels,
-            textposition = 'top center'
+            x=x_vals,
+            y=y_vals,
+            mode='markers+text',
+            text=labels,
+            textposition='top center',
+            marker=dict(
+                size=10,
+                color='royalblue',
+                line=dict(width=1, color='black')
+            )
         ))
 
         fig.update_layout(
-            title = "Positive vs. Negative Sentiment in Each Article",
-            xaxis_title = "Positive Sentences",
-            yaxis_title = "Negative Sentences"
+            title="Positive vs. Negative Sentiment (Percentage) per Article",
+            xaxis_title="Positive Sentiment (%)",
+            yaxis_title="Negative Sentiment (%)",
+            xaxis=dict(range=[10, 45]),
+            yaxis=dict(range=[5, 25])
         )
 
         fig.show()
+
