@@ -6,6 +6,8 @@ import re
 import string
 from collections import Counter, defaultdict
 from textblob import TextBlob
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 nltk.download('stopwords')
 
@@ -16,11 +18,12 @@ class TextAnalysis:
         self.stopwords = set()
         self.data = defaultdict(dict)
 
+    # List of stop words
     def load_stop_words(self):
         # A list of common stop words from NLTK library
         self.stopwords = set(stopwords.words('english'))
 
-
+    # Our generic parser for pre-processing text
     def generic_parser(self, text):
         text = text.lower()
 
@@ -54,6 +57,7 @@ class TextAnalysis:
         # Get sentiment for raw text
         sentiment = TextBlob(text).sentiment.polarity
 
+        # Create the dictionary
         text_dict = {
             "text": clean_text,
             "word_freqs": Counter(words),
@@ -85,18 +89,136 @@ class TextAnalysis:
         for k, v in parsed.items():
             self.data[k][label] = v
 
-
+    # Visualization 1: Sankey
     def wordcount_sankey(self, word_list=None, k=5):
-        # Map each text to words using a Sankey diagram, where the thickness of the line
-        # is the number of times that word occurs in the text. Users can specify a particular
-        # set of words, or the words can be the union of the k most common words across
-        # each text file (excluding stop words).
-        pass
+        labels = []  # All nodes in the diagram: text names + words
+        sources = []  # Index of source node (text label)
+        targets = []  # Index of target node (word)
+        values = []  # Thickness of the connection = word count
+        label_indices = {}  # Mapping from label to node index
 
-    def your_second_visualization(self, misc_parameters):
-        # A visualization array of subplots with one subplot for each text file.
-        # Rendering subplots is a good, advanced skill to know!
-        pass
+        # Getting all the text labels
+        text_labels = list(self.data["word_freqs"].keys())
+
+        # Picks which words to use:
+        if word_list:
+            selected_words = set(word_list)
+        else:
+            selected_words = set()
+            for label in text_labels:
+                most_common = self.data["word_freqs"][label].most_common(k)
+                selected_words.update([w for w, _ in most_common])
+
+        # Add text labels first
+        for label in text_labels:
+            label_indices[label] = len(labels)
+            labels.append(label)
+
+        # Then add word labels
+        for word in sorted(selected_words):
+            label_indices[word] = len(labels)
+            labels.append(word)
+
+        # Build text to word connections
+        for label in text_labels:
+            word_freq = self.data["word_freqs"][label]
+            for word in selected_words:
+                if word in word_freq:
+                    sources.append(label_indices[label])
+                    targets.append(label_indices[word])
+                    values.append(word_freq[word])
+
+        # Create sankey diagram
+        fig = go.Figure(data=[go.Sankey(
+            node=dict(
+                pad=15,
+                thickness=20,
+                line=dict(color="black", width=0.5),
+                label=labels
+            ),
+            link=dict(
+                source=sources,
+                target=targets,
+                value=values
+            )
+        )])
+
+        fig.update_layout(title_text="Text-to-Word Sankey Diagram", font_size=10)
+        fig.show()
+
+
+    def sentiment_distribution_subplots(self):
+        """
+        Creates subplots of sentence-level sentiment histograms for each article.
+        Each subplot shows the emotional distribution within an article.
+        """
+        print("📊 Building sentiment distribution subplots...")
+
+        num_articles = len(self.data["text"])
+        cols = 3
+        rows = -(-num_articles // cols)  # ceil division
+
+
+        fig = make_subplots(
+            rows=rows,
+            cols=cols,
+            subplot_titles=list(self.data['text'].keys()),
+            horizontal_spacing=0.1,
+            vertical_spacing=0.15
+        )
+
+        for i, label in enumerate(self.data['text'].keys()):
+            sentiment_counts = self.data['sentiment_counts'][label]
+
+            labels = ['negative', 'neutral', 'positive']
+
+            sentiments = [
+            sentiment_counts.get('negative', 0),
+            sentiment_counts.get('neutral', 0),
+            sentiment_counts.get('positive', 0),
+            ]
+
+            colors = ['red', 'gray', 'green']
+
+            row = (i // cols) + 1
+            col = (i % cols) + 1
+
+            fig.add_trace(
+                go.Bar(
+                    x=labels,
+                    y = sentiments,
+                    marker_color=colors,
+                    text = sentiments,
+                    showlegend=False,
+                    textposition='auto'
+                ),
+                row=row,
+                col=col,
+            )
+
+            fig.update_xaxes(
+                title_text="Sentiment",
+                tickvals=["positive", "neutral", "negative"],  # Set the tick values to the sentiment labels
+                row=row,
+                col=col
+            )
+
+            # Set y-axis properties with the same range across all subplots
+            fig.update_yaxes(
+                title_text="Sentence Count",
+                range=[0, 40],  # Set the y-axis range to the max sentence count
+                row=row,
+                col=col
+            )
+
+        fig.update_layout(
+            height=300 * rows,
+            width=1000,
+            title_text="Sentence-Level Sentiment Distribution per Article",
+            title_x=0.5,
+            plot_bgcolor="white"
+        )
+        fig.show()
 
     def your_third_visualization(self, misc_parameters):
         # A single visualization that overlays data from each of the text files. Make sure your
