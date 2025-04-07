@@ -270,6 +270,7 @@ class TextAnalysis:
         y_vals = []
         labels = []
 
+        # get counts
         for label, counts in self.data['sentiment_counts'].items():
             total = sum(counts.values())
             pos_count = counts['positive']
@@ -278,11 +279,13 @@ class TextAnalysis:
             y_vals.append(neg_count)
             labels.append(label)
         
+        # make scatterplot
         fig = go.Figure(data=go.Scatter(
             x = x_vals,
             y = y_vals,
             mode = 'markers+text',
-            text = labels
+            text = labels,
+            textposition = 'top center'
         ))
 
         fig.update_layout(
