@@ -17,6 +17,9 @@ def main():
 
     tt.wordcount_sankey(k=5)
     tt.sentiment_distribution_subplots()
+    tt.article_sentiment_comparison()
+    tt.article_sentiment_comparison(sentiment_type='negative')
+    tt.article_sentiment_comparison(sentiment_type='neutral')
 
 
 if __name__ == "__main__":
