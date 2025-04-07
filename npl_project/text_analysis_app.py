@@ -1,6 +1,4 @@
 from text_analysis_class import TextAnalysis
-import pprint as pp
-
 
 def main():
     tt = TextAnalysis()
@@ -16,7 +14,6 @@ def main():
     tt.load_text("NPR.txt", label="NPR")
     tt.load_text("USA_Today.txt", label="USA_Today")
     tt.load_text("The_Hill.txt", label="The_Hill")
-
 
     tt.wordcount_sankey(k=5)
     tt.sentiment_distribution_subplots()

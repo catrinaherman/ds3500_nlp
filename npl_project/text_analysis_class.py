@@ -152,7 +152,6 @@ class TextAnalysis:
         Creates subplots of sentence-level sentiment histograms for each article.
         Each subplot shows the emotional distribution within an article.
         """
-        print("📊 Building sentiment distribution subplots...")
 
         num_articles = len(self.data["text"])
         cols = 3
