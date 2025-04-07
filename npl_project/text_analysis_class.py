@@ -27,7 +27,19 @@ class TextAnalysis:
         # record the sentences
         sentences = re.split(r'[.!?]', text)
         sentences = [s.strip() for s in sentences if s.strip()]
+        sentence_sentiments = [TextBlob(s).sentiment.polarity for s in sentences if s.strip()]
+        avg_sentiment = sum(sentence_sentiments) / len(sentence_sentiments)
 
+        # analyze the polarity of each individual sentence, whether positive, negative or neutral
+        sentiment_counts = {'positive': 0, 'negative': 0, 'neutral': 0}
+        for s in sentences:
+            polarity = TextBlob(s).sentiment.polarity
+            if polarity > .1:
+                sentiment_counts['positive'] += 1
+            elif polarity < -.1:
+                sentiment_counts['negative'] += 1
+            else:
+                sentiment_counts['neutral'] += 1
 
         # Clean the text -- white space and punctuation
         clean_text = re.sub(rf"[{re.escape(string.punctuation)}]", "", text)
@@ -47,7 +59,9 @@ class TextAnalysis:
             "num_sentences": len(sentences),
             "avg_word_len": sum(len(word) for word in words) / len(words) if words else 0,
             "avg_sentence_len": len(words) / len(sentences),
-            "sentiment": sentiment
+            "sentiment": sentiment,
+            "avg_sentiment": avg_sentiment,
+            "sentiment_counts": sentiment_counts,
         }
 
         return text_dict
