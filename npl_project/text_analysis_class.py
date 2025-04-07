@@ -46,6 +46,12 @@ class TextAnalysis:
             else:
                 sentiment_counts['neutral'] += 1
 
+        # get the percentages of each articles sentiment
+        sentiment_percentages = {
+            sentiment: round((count / len(sentence_sentiments) * 100), 3) if len(sentence_sentiments) else 0
+            for sentiment, count in sentiment_counts.items()
+        }
+
         # Clean the text -- white space and punctuation
         clean_text = re.sub(rf"[{re.escape(string.punctuation)}]", "", text)
         clean_text = re.sub(r'\s+', ' ', clean_text).strip()
@@ -68,6 +74,7 @@ class TextAnalysis:
             "sentiment": sentiment,
             "avg_sentiment": avg_sentiment,
             "sentiment_counts": sentiment_counts,
+            "sentiment_percentages": sentiment_percentages
         }
 
         return text_dict
@@ -167,14 +174,14 @@ class TextAnalysis:
         )
 
         for i, label in enumerate(self.data['text'].keys()):
-            sentiment_counts = self.data['sentiment_counts'][label]
+            sentiment_percentages = self.data['sentiment_percentages'][label]
 
             labels = ['negative', 'neutral', 'positive']
 
             sentiments = [
-            sentiment_counts.get('negative', 0),
-            sentiment_counts.get('neutral', 0),
-            sentiment_counts.get('positive', 0),
+            sentiment_percentages.get('negative', 0),
+            sentiment_percentages.get('neutral', 0),
+            sentiment_percentages.get('positive', 0),
             ]
 
             colors = ['red', 'gray', 'green']
@@ -187,7 +194,6 @@ class TextAnalysis:
                     x=labels,
                     y = sentiments,
                     marker_color=colors,
-                    text = sentiments,
                     showlegend=False,
                     textposition='auto'
                 ),
@@ -204,8 +210,8 @@ class TextAnalysis:
 
             # Set y-axis properties with the same range across all subplots
             fig.update_yaxes(
-                title_text="Sentence Count",
-                range=[0, 40],  # Set the y-axis range to the max sentence count
+                title_text="Sentence Percentage",
+                range=[0, 80],  # Set the y-axis range to the max sentence count
                 row=row,
                 col=col
             )
