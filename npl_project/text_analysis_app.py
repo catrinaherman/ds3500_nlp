@@ -20,7 +20,7 @@ def main():
     tt.article_sentiment_comparison()
     tt.article_sentiment_comparison(sentiment_type='negative')
     tt.article_sentiment_comparison(sentiment_type='neutral')
-
+    tt.sentiment_scatter()
 
 if __name__ == "__main__":
     main()
