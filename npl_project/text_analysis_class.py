@@ -256,3 +256,33 @@ class TextAnalysis:
 
         fig.show()
 
+    def sentiment_scatter(self):
+        """
+        Creates a scatterplot of positive versus negative sentiment counts for each article.
+        """
+        x_vals = []
+        y_vals = []
+        labels = []
+
+        for label, counts in self.data['sentiment_counts'].items():
+            total = sum(counts.values())
+            pos_count = counts['positive']
+            neg_count = counts['negative']
+            x_vals.append(pos_count)
+            y_vals.append(neg_count)
+            labels.append(label)
+        
+        fig = go.Figure(data=go.Scatter(
+            x = x_vals,
+            y = y_vals,
+            mode = 'markers+text',
+            text = labels
+        ))
+
+        fig.update_layout(
+            title = "Positive vs. Negative Sentiment in Each Article",
+            xaxis_title = "Positive Sentences",
+            yaxis_title = "Negative Sentences"
+        )
+
+        fig.show()
