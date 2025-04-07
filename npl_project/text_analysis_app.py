@@ -14,6 +14,7 @@ def main():
     tt.load_text("Fox_3.txt", label="FOX3")
     tt.load_text("NPR.txt", label="NPR")
     tt.load_text("USA_Today.txt", label="USA_Today")
+    tt.load_text("The_Hill.txt", label="The_Hill")
 
     pp.pprint(tt.data)
 

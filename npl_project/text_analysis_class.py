@@ -27,6 +27,8 @@ class TextAnalysis:
         # record the sentences
         sentences = re.split(r'[.!?]', text)
         sentences = [s.strip() for s in sentences if s.strip()]
+
+        # get the sentence sentiments and average sentiment
         sentence_sentiments = [TextBlob(s).sentiment.polarity for s in sentences if s.strip()]
         avg_sentiment = sum(sentence_sentiments) / len(sentence_sentiments)
 
