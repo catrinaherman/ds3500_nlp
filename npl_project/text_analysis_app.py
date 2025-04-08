@@ -20,6 +20,7 @@ def main():
     tt.load_text("USA_Today.txt", label="USA_Today")
     tt.load_text("The_Hill.txt", label="The_Hill")
 
+<<<<<<< Updated upstream
     # Generate a sankey diagram to show which words are most commonly used
     tt.wordcount_sankey(k=3)
 
@@ -36,6 +37,13 @@ def main():
     tt.sentiment_scatter()
 
     # Create a radar chart to compare multiple features (ex: avg sentence length, positive/negative sentiment, etc)
+=======
+    # tt.wordcount_sankey(k=3)
+    # tt.sentiment_distribution_subplots()
+    # tt.article_sentiment_comparison(sentiment_type='positive')
+    # tt.article_sentiment_comparison(sentiment_type='negative')
+    # tt.sentiment_scatter()
+>>>>>>> Stashed changes
     tt.radar_chart()
 
 # Runs the analysis when the script gets executed

@@ -8,9 +8,7 @@ from collections import Counter, defaultdict
 from textblob import TextBlob
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-
 nltk.download('stopwords')
-
 
 class TextAnalysis:
 
@@ -20,11 +18,18 @@ class TextAnalysis:
 
     # List of stop words
     def load_stop_words(self):
+        """
+        Utilizes NLTK to load stop words and save into self.stopwords.
+        :return:
+        """
         # A list of common stop words from NLTK library
         self.stopwords = set(stopwords.words('english'))
 
     # Our generic parser for pre-processing text
     def generic_parser(self, text):
+        """
+        Generic parser and pre-processor for raw text. Returns data metrics on the text as a dictionary.
+        """
         text = text.lower()
 
         # record the sentences
@@ -87,7 +92,7 @@ class TextAnalysis:
 
         if not label:
             label = filename
-
+        # if a parser is specified, run it, otherwise use the generic parser
         if parser:
             parsed = parser(text)
         else:
@@ -153,18 +158,18 @@ class TextAnalysis:
         fig.update_layout(title_text="Text-to-Word Sankey Diagram", font_size=10)
         fig.show()
 
-
+    # Visualization 2: Subplots with Sentiment Percentages
     def sentiment_distribution_subplots(self):
         """
         Creates subplots of sentence-level sentiment histograms for each article.
         Each subplot shows the emotional distribution within an article.
         """
-
+        # State the necessary numbers
         num_articles = len(self.data["text"])
         cols = 2
         rows = -(-num_articles // cols)  # ceil division
 
-
+        # Establish the figure / subplots
         fig = make_subplots(
             rows=rows,
             cols=cols,
@@ -172,23 +177,22 @@ class TextAnalysis:
             horizontal_spacing=0.1,
             vertical_spacing=0.15
         )
-
+        # Iterate through each article, collecting the sentiment percentages
         for i, label in enumerate(self.data['text'].keys()):
             sentiment_percentages = self.data['sentiment_percentages'][label]
 
-            labels = ['negative', 'neutral', 'positive']
+            labels = ['negative', 'positive']
 
             sentiments = [
             sentiment_percentages.get('negative', 0),
-            sentiment_percentages.get('neutral', 0),
             sentiment_percentages.get('positive', 0),
             ]
 
-            colors = ['red', 'gray', 'green']
+            colors = ['red', 'green']
 
             row = (i // cols) + 1
             col = (i % cols) + 1
-
+            # Add the graph for that article to the correct subplot
             fig.add_trace(
                 go.Bar(
                     x=labels,
@@ -200,10 +204,10 @@ class TextAnalysis:
                 row=row,
                 col=col,
             )
-
+            # Create x axes labels
             fig.update_xaxes(
                 title_text="Sentiment",
-                tickvals=["positive", "neutral", "negative"],  # Set the tick values to the sentiment labels
+                tickvals=["positive", "negative"],  # Set the tick values to the sentiment labels
                 row=row,
                 col=col
             )
@@ -211,11 +215,11 @@ class TextAnalysis:
             # Set y-axis properties with the same range across all subplots
             fig.update_yaxes(
                 title_text="Sentence Percentage",
-                range=[0, 80],  # Set the y-axis range to the max sentence count
+                range=[0, 20],
                 row=row,
                 col=col
             )
-
+        # Create title
         fig.update_layout(
             height=300 * rows,
             width=1000,
@@ -223,8 +227,13 @@ class TextAnalysis:
             title_x=0.5,
             plot_bgcolor="white"
         )
+        # Update the individual title sizes
+        for annotation in fig['layout']['annotations']:
+            annotation['font'] = dict(size=20)
+
         fig.show()
 
+    # Visualization 3: Bar Chart Comparing Specific Sentiment Percentages Across Articles
     def article_sentiment_comparison(self, sentiment_type='positive'):
         """
         Creates a bar chart comparing the percentage of a selected sentiment type
@@ -233,19 +242,23 @@ class TextAnalysis:
         if sentiment_type not in ['positive', 'negative', 'neutral']:
             raise ValueError("sentiment_type must be 'positive', 'negative', or 'neutral'")
 
+        # Save article labels and create empty list of percentages
         article_labels = list(self.data['sentiment_percentages'].keys())
         percentages = []
 
+        # Add each percentage for the sentiment type to the list of percentages
         for label in article_labels:
             percent = self.data['sentiment_percentages'][label].get(sentiment_type, 0)
             percentages.append(percent)
 
+        # Save the colors for each sentiment type
         color_map_dict = {
             'positive': 'green',
             'negative': 'red',
             'neutral': 'gray'
         }
 
+        # Create the figure
         fig = go.Figure(data=[
             go.Bar(
                 x=article_labels,
@@ -255,7 +268,7 @@ class TextAnalysis:
                 textposition='auto'
             )
         ])
-
+        # Set the title(s)
         fig.update_layout(
             title=f"Percentage of {sentiment_type.capitalize()} Sentences per Article",
             xaxis_title="Article",
@@ -266,14 +279,18 @@ class TextAnalysis:
 
         fig.show()
 
+    # Visualization 4: Scatterplot of positive vs. negative sentiment percentages
     def sentiment_scatter(self):
         """
         Creates a scatterplot of positive vs. negative sentiment percentages for each article.
+
         """
+        # Initiate empty lists
         x_vals = []
         y_vals = []
         labels = []
 
+        # Get the articles and their percentages, save to the lists
         for label, percentages in self.data['sentiment_percentages'].items():
             pos_percent = percentages.get('positive', 0)
             neg_percent = percentages.get('negative', 0)
@@ -281,6 +298,7 @@ class TextAnalysis:
             y_vals.append(neg_percent)
             labels.append(label)
 
+        # Create the scatterplot
         fig = go.Figure(data=go.Scatter(
             x=x_vals,
             y=y_vals,
@@ -294,6 +312,7 @@ class TextAnalysis:
             )
         ))
 
+        # Add the title(s)
         fig.update_layout(
             title="Positive vs. Negative Sentiment (Percentage) per Article",
             xaxis_title="Positive Sentiment (%)",
@@ -304,11 +323,12 @@ class TextAnalysis:
 
         fig.show()
 
+    # Visualization 5: Radar Chart of text analysis metrics across articles
     def radar_chart(self):
         """
         Generates a radar chart comparing article metrics like sentiment, word length, etc.
         """
-
+        # Initiate a dictionary of empty lists for each metric
         metrics = {
             "avg_word_len": [],
             "avg_sentence_len": [],
@@ -319,10 +339,12 @@ class TextAnalysis:
             "%_neutral": []
         }
 
+        # Save the article labels and data
         article_labels = list(self.data["text"].keys())
+        media = self.data
 
+        # Go through each article label, add the metrics for that label to the dictionary
         for label in article_labels:
-            media = self.data
             sent_count = media["sentiment_counts"][label]
             total = sum(sent_count.values())
 
@@ -333,7 +355,7 @@ class TextAnalysis:
             metrics["%_positive"].append(sent_count["positive"] / total * 100)
             metrics["%_negative"].append(sent_count["negative"] / total * 100)
             metrics["%_neutral"].append(sent_count["neutral"] / total * 100)
-
+        # Save the metric names into a list
         categories = list(metrics.keys())
         fig = go.Figure()
 
@@ -343,7 +365,7 @@ class TextAnalysis:
             max_val = max(metrics[key])
             normalized_metrics[key] = [v / max_val * 100 if max_val else 0 for v in metrics[key]]
 
-            # Create the radar chart for each article
+        # Create the radar chart for each article
         for i, label in enumerate(article_labels):
             values = [
                 normalized_metrics["avg_word_len"][i],
@@ -360,7 +382,7 @@ class TextAnalysis:
                 fill='toself',
                 name=label
             ))
-
+        # Add the title
         fig.update_layout(
             title="Radar Chart of Text Metrics by Article",
             polar=dict(
