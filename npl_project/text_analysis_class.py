@@ -161,7 +161,7 @@ class TextAnalysis:
         """
 
         num_articles = len(self.data["text"])
-        cols = 3
+        cols = 2
         rows = -(-num_articles // cols)  # ceil division
 
 
