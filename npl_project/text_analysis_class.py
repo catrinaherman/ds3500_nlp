@@ -298,8 +298,75 @@ class TextAnalysis:
             title="Positive vs. Negative Sentiment (Percentage) per Article",
             xaxis_title="Positive Sentiment (%)",
             yaxis_title="Negative Sentiment (%)",
-            xaxis=dict(range=[10, 45]),
-            yaxis=dict(range=[5, 25])
+            xaxis=dict(range=[0, 45]),
+            yaxis=dict(range=[0, 25])
+        )
+
+        fig.show()
+
+    def radar_chart(self):
+        """
+        Generates a radar chart comparing article metrics like sentiment, word length, etc.
+        """
+
+        metrics = {
+            "avg_word_len": [],
+            "avg_sentence_len": [],
+            "sentiment": [],
+            "num_words": [],
+            "%_positive": [],
+            "%_negative": [],
+            "%_neutral": []
+        }
+
+        article_labels = list(self.data["text"].keys())
+
+        for label in article_labels:
+            media = self.data
+            sent_count = media["sentiment_counts"][label]
+            total = sum(sent_count.values())
+
+            metrics["avg_word_len"].append(media["avg_word_len"][label])
+            metrics["avg_sentence_len"].append(media["avg_sentence_len"][label])
+            metrics["sentiment"].append(media["sentiment"][label])
+            metrics["num_words"].append(media["num_words"][label])
+            metrics["%_positive"].append(sent_count["positive"] / total * 100)
+            metrics["%_negative"].append(sent_count["negative"] / total * 100)
+            metrics["%_neutral"].append(sent_count["neutral"] / total * 100)
+
+        categories = list(metrics.keys())
+        fig = go.Figure()
+
+        # Normalize non-percentage metrics (first 4)
+        normalized_metrics = {}
+        for key in list(metrics.keys())[:4]:
+            max_val = max(metrics[key])
+            normalized_metrics[key] = [v / max_val * 100 if max_val else 0 for v in metrics[key]]
+
+            # Create the radar chart for each article
+        for i, label in enumerate(article_labels):
+            values = [
+                normalized_metrics["avg_word_len"][i],
+                normalized_metrics["avg_sentence_len"][i],
+                normalized_metrics["sentiment"][i],
+                normalized_metrics["num_words"][i],
+                metrics["%_positive"][i],
+                metrics["%_negative"][i],
+                metrics["%_neutral"][i]]
+
+            fig.add_trace(go.Scatterpolar(
+                r=values,
+                theta=categories,
+                fill='toself',
+                name=label
+            ))
+
+        fig.update_layout(
+            title="Radar Chart of Text Metrics by Article",
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0, 100])
+            ),
+            showlegend=True
         )
 
         fig.show()

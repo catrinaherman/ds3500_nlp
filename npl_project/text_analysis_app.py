@@ -16,12 +16,12 @@ def main():
     tt.load_text("USA_Today.txt", label="USA_Today")
     tt.load_text("The_Hill.txt", label="The_Hill")
 
-    pp.pprint(tt.data)
-    tt.wordcount_sankey(k=5)
-    tt.sentiment_distribution_subplots()
-    tt.article_sentiment_comparison(sentiment_type='positive')
-    tt.article_sentiment_comparison(sentiment_type='negative')
-    tt.sentiment_scatter()
+    # tt.wordcount_sankey(k=5)
+    # tt.sentiment_distribution_subplots()
+    # tt.article_sentiment_comparison(sentiment_type='positive')
+    # tt.article_sentiment_comparison(sentiment_type='negative')
+    # tt.sentiment_scatter()
+    tt.radar_chart()
 
 if __name__ == "__main__":
     main()
